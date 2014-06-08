@@ -22,5 +22,8 @@ setup(
     ],
 
     packages=find_packages('.', exclude=('tests*', 'testing*')),
-    install_requires=[],
+    install_requires=[
+        'argparse',
+        'pyyaml',
+    ],
 )
