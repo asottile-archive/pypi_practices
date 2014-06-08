@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import argparse
 import sys
 
+from pypi_practices import five
 from pypi_practices.errors import FileValidationError
 
 
@@ -56,23 +57,7 @@ def make_entry(check_fn, fix_fn):
         try:
             return check_fn(cwd)
         except FileValidationError as e:
-            print(
-                '{0}{1}: {2}'.format(
-                    e.filename,
-                    ':{0}'.format(e.line) if e.line is not None else '',
-                    e.validation_message,
-                )
-            )
-            print()
-
-            if e.is_auto_fixable:
-                print(
-                    'To attempt automatic fixing of this run:\n'
-                    '    {0} --fix'.format(sys.argv[0])
-                )
-            else:
-                print('Manually edit the files above to fix.')
-
+            print(five.text(e))
             return 1
 
     return entry
