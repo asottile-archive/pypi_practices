@@ -48,7 +48,7 @@ def make_entry(check_fn, fix_fn):
         if type(cwd) is bytes:  # pragma: no cover (PY2 only)
             cwd = cwd.decode('utf-8')
 
-        # TODO: load .practices-config.yaml
+        # TODO: load .pypi-practices-config.yaml
 
         if args.fix:
             return fix_fn(cwd)
