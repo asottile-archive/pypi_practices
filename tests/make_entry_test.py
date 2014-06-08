@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import mock
 import pytest
-import re
 import sys
 
 from pypi_practices import five
@@ -90,11 +89,11 @@ def test_raises_validation_error(print_mock):
     entry = make_entry(raising_check, noop)
     ret = entry([])
     assert ret == 1
-    print_mock.assert_has_calls([
-        mock.call('README.md: Missing something.'),
-        mock.call(),
-        mock.call('Manually edit the files above to fix.'),
-    ])
+    print_mock.assert_called_once_with(
+        'README.md: Missing something.\n'
+        '\n'
+        'Manually edit the file above to fix.'
+    )
 
 
 def test_message_contains_line_if_specified(print_mock):
@@ -108,11 +107,11 @@ def test_message_contains_line_if_specified(print_mock):
     entry = make_entry(raising_check_with_line_number, noop)
     ret = entry([])
     assert ret == 1
-    print_mock.assert_has_calls([
-        mock.call('README.md:5: Missing something.'),
-        mock.call(),
-        mock.call('Manually edit the files above to fix.'),
-    ])
+    print_mock.assert_called_once_with(
+        'README.md:5: Missing something.\n'
+        '\n'
+        'Manually edit the file above to fix.'
+    )
 
 
 def test_auto_fixable_prints_auto_fixable(print_mock):
@@ -126,16 +125,8 @@ def test_auto_fixable_prints_auto_fixable(print_mock):
     entry = make_entry(raising_check_auto_fixable, noop)
     ret = entry([])
     assert ret == 1
-    print_mock.assert_has_calls([
-        mock.call('README.md: Missing something.'),
-        mock.call(),
-        # Verified below
-        mock.call(mock.ANY),
-    ])
-
-    print_str = print_mock.mock_calls[2][1][0]
-    assert re.match(
-        '^To attempt automatic fixing of this run:\n'
-        '    .+ --fix$',
-        print_str,
+    print_mock.assert_called_once_with(
+        'README.md: Missing something.\n'
+        '\n'
+        'To attempt automatic fixing, run with --fix.'
     )

@@ -1,17 +1,21 @@
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import io
 import os.path
-import pytest
 
 from pypi_practices.check_readme import check_readme
 from pypi_practices.check_readme import fix_readme
 from pypi_practices.errors import FileValidationError
+from testing.util import assert_raises_with_msg
 
 
 def test_readme_does_not_exist(tmpdir):
-    # TODO: assert raises exactly
-    with pytest.raises(FileValidationError):
+    with assert_raises_with_msg(
+        FileValidationError,
+        'README.md: File does not exist.\n\n'
+        'To attempt automatic fixing, run with --fix.'
+    ):
         check_readme(tmpdir.strpath)
 
 
