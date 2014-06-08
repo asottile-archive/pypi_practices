@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 import io
 import jsonschema
 import os.path
-import traceback
 import yaml
 import yaml.error
 
@@ -34,20 +33,18 @@ def load_config(cwd):
     with io.open(config_filename) as config_file:
         try:
             config_contents = yaml.load(config_file)
-        except yaml.error.YAMLError:
+        except yaml.error.YAMLError as e:
             raise FileValidationError(
                 '.pypi-practices-config.yaml',
-                'Invalid Yaml:\n\n{0}'.format(traceback.format_exc())
+                'Invalid Yaml:\n\n{0}'.format(e)
             )
 
     try:
         jsonschema.validate(config_contents, CONFIG_SCHEMA)
-    except jsonschema.exceptions.ValidationError:
+    except jsonschema.exceptions.ValidationError as e:
         raise FileValidationError(
             '.pypi-practices-config.yaml',
-            'File does not satisfy schema:\n\n{0}'.format(
-                traceback.format_exc()
-            )
+            'File does not satisfy schema:\n\n{0}'.format(e)
         )
 
     return config_contents

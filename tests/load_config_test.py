@@ -1,11 +1,13 @@
+from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import io
 import os.path
-import pytest
 
 from pypi_practices.errors import FileValidationError
 from pypi_practices.load_config import load_config
+from testing.util import assert_raises_with_msg
+from testing.util import REMatcher
 
 
 def test_load_config_returns_empty_dict_non_existing(tmpdir):
@@ -38,8 +40,17 @@ def test_load_invalid_yaml(tmpdir):
     # It's surprisingly hard to make invalid yaml!
     _write_config_file(tmpdir.strpath, 'foo: "')
 
-    # TODO: assert exception message
-    with pytest.raises(FileValidationError):
+    with assert_raises_with_msg(
+        FileValidationError,
+        REMatcher(
+            r'^.pypi-practices-config.yaml: Invalid Yaml:\n\n'
+            r'while scanning a quoted scalar\n'
+            r'  in ".+\.pypi-practices-config.yaml", line 1, column 6\n'
+            r'found unexpected end of stream\n'
+            r'  in ".+\.pypi-practices-config.yaml", line 1, column 7\n\n'
+            r'Manually edit the file above to fix.'
+        ),
+    ):
         load_config(tmpdir.strpath)
 
 
@@ -47,6 +58,17 @@ def test_valid_yaml_invalid_config(tmpdir):
     # autofix is a boolean
     _write_config_file(tmpdir.strpath, 'autofix: herp')
 
-    # TODO: assert exception message
-    with pytest.raises(FileValidationError):
+    with assert_raises_with_msg(
+        FileValidationError,
+        REMatcher(
+            r"^.pypi-practices-config.yaml: File does not satisfy schema:\n\n"
+            r"'herp' is not of type u?'boolean'\n\n"
+            r"Failed validating u?'type' "
+            r"in schema\[u?'properties'\]\[u?'autofix'\]:\n"
+            r"    {u?'type': u?'boolean'}\n\n"
+            r"On instance\[u?'autofix'\]:\n"
+            r"    'herp'\n\n"
+            r'Manually edit the file above to fix.'
+        )
+    ):
         load_config(tmpdir.strpath)
