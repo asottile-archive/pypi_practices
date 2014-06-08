@@ -6,7 +6,7 @@ import os.path
 import yaml
 import yaml.error
 
-from pypi_practices.errors import FileValidationError
+from pypi_practices.errors import ConfigValidationError
 
 
 CONFIG_SCHEMA = {
@@ -34,7 +34,7 @@ def load_config(cwd):
         try:
             config_contents = yaml.load(config_file)
         except yaml.error.YAMLError as e:
-            raise FileValidationError(
+            raise ConfigValidationError(
                 '.pypi-practices-config.yaml',
                 'Invalid Yaml:\n\n{0}'.format(e)
             )
@@ -42,7 +42,7 @@ def load_config(cwd):
     try:
         jsonschema.validate(config_contents, CONFIG_SCHEMA)
     except jsonschema.exceptions.ValidationError as e:
-        raise FileValidationError(
+        raise ConfigValidationError(
             '.pypi-practices-config.yaml',
             'File does not satisfy schema:\n\n{0}'.format(e)
         )

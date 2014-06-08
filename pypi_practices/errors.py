@@ -1,8 +1,26 @@
 from __future__ import unicode_literals
 
 
-class FileValidationError(ValueError):
+class ValidationError(ValueError):
+    pass
+
+
+class ConfigValidationError(ValidationError):
+    def __init__(self, filename, validation_message):
+        super(ConfigValidationError, self).__init__({
+            'filename': filename,
+            'validation_message': validation_message,
+        })
+        self.filename = filename
+        self.validation_message = validation_message
+
+    def __str__(self):
+        return '{0}: {1}'.format(self.filename, self.validation_message)
+
+
+class FileValidationError(ValidationError):
     """Represents an error in validating."""
+
     def __init__(
             self,
             filename,

@@ -5,7 +5,8 @@ import argparse
 import sys
 
 from pypi_practices import five
-from pypi_practices.errors import FileValidationError
+from pypi_practices.errors import ValidationError
+from pypi_practices.load_config import load_config
 
 
 def make_entry(check_fn, fix_fn):
@@ -17,10 +18,12 @@ def make_entry(check_fn, fix_fn):
     --fix - Attempt auto-fixing of rule.
     filenames - (Ignored) for compatibility with pre-commit.
 
-    :param function check_fn: Function to check the rule.  The check_fn takes
-        a single argument: the cwd.
+    The check and fix functions take the following arguments:
+        cwd - Current working directory to find files at.
+        config - Configuration in .pypi-practices-config.yaml
+
+    :param function check_fn: Function to check the rule.
     :param function fix_fn: Function which attempts to fix the rule.
-        The fix_fn takes a single argument: the cwd.
     """
     def entry(argv=None):
         if argv is None:
@@ -49,14 +52,18 @@ def make_entry(check_fn, fix_fn):
         if type(cwd) is bytes:  # pragma: no cover (PY2 only)
             cwd = cwd.decode('utf-8')
 
-        # TODO: load .pypi-practices-config.yaml
+        try:
+            config = load_config(cwd)
+        except ValidationError as e:
+            print(five.text(e))
+            return 1
 
         if args.fix:
-            return fix_fn(cwd)
+            return fix_fn(cwd, config)
 
         try:
-            return check_fn(cwd)
-        except FileValidationError as e:
+            return check_fn(cwd, config)
+        except ValidationError as e:
             print(five.text(e))
             return 1
 

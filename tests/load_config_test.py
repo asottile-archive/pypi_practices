@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 import io
 import os.path
 
-from pypi_practices.errors import FileValidationError
+from pypi_practices.errors import ConfigValidationError
 from pypi_practices.load_config import load_config
 from testing.util import assert_raises_with_msg
 from testing.util import REMatcher
@@ -41,14 +41,13 @@ def test_load_invalid_yaml(tmpdir):
     _write_config_file(tmpdir.strpath, 'foo: "')
 
     with assert_raises_with_msg(
-        FileValidationError,
+        ConfigValidationError,
         REMatcher(
             r'^.pypi-practices-config.yaml: Invalid Yaml:\n\n'
             r'while scanning a quoted scalar\n'
             r'  in ".+\.pypi-practices-config.yaml", line 1, column 6\n'
             r'found unexpected end of stream\n'
-            r'  in ".+\.pypi-practices-config.yaml", line 1, column 7\n\n'
-            r'Manually edit the file above to fix.'
+            r'  in ".+\.pypi-practices-config.yaml", line 1, column 7'
         ),
     ):
         load_config(tmpdir.strpath)
@@ -59,7 +58,7 @@ def test_valid_yaml_invalid_config(tmpdir):
     _write_config_file(tmpdir.strpath, 'autofix: herp')
 
     with assert_raises_with_msg(
-        FileValidationError,
+        ConfigValidationError,
         REMatcher(
             r"^.pypi-practices-config.yaml: File does not satisfy schema:\n\n"
             r"'herp' is not of type u?'boolean'\n\n"
@@ -67,8 +66,7 @@ def test_valid_yaml_invalid_config(tmpdir):
             r"in schema\[u?'properties'\]\[u?'autofix'\]:\n"
             r"    {u?'type': u?'boolean'}\n\n"
             r"On instance\[u?'autofix'\]:\n"
-            r"    'herp'\n\n"
-            r'Manually edit the file above to fix.'
+            r"    'herp'"
         )
     ):
         load_config(tmpdir.strpath)
