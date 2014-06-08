@@ -1,0 +1,7 @@
+-e .
+
+coverage
+flake8
+pylint
+pytest
+pre-commit
