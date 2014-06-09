@@ -22,6 +22,11 @@ setup(
     ],
 
     packages=find_packages('.', exclude=('tests*', 'testing*')),
+    package_data={
+        'pypi_practices': [
+            'resources/README.md.template',
+        ],
+    },
     install_requires=[
         'argparse',
         'jsonschema',

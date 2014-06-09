@@ -14,6 +14,7 @@ CONFIG_SCHEMA = {
         'autofix': {'type': 'boolean'},
         'github_user': {'type': 'string'},
         'package_name': {'type': 'string'},
+        'repo_description': {'type': 'string'},
     },
 }
 

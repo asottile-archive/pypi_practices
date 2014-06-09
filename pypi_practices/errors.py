@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
 
 
+# pylint:disable=star-args
+
+
 class ValidationError(ValueError):
     pass
 
@@ -18,38 +21,20 @@ class ConfigValidationError(ValidationError):
         return '{0}: {1}'.format(self.filename, self.validation_message)
 
 
+def _format_error_line(filename, line, msg):
+    return '{0}{1}: {2}'.format(
+        filename,
+        ':{0}'.format(line) if line is not None else '',
+        msg,
+    )
+
+
 class FileValidationError(ValidationError):
     """Represents an error in validating."""
 
-    def __init__(
-            self,
-            filename,
-            validation_message,
-            line=None,
-            is_auto_fixable=False,
-    ):
-        super(FileValidationError, self).__init__({
-            'filename': filename,
-            'validation_message': validation_message,
-            'line': line,
-            'is_auto_fixable': is_auto_fixable,
-        })
-        self.filename = filename
-        self.validation_message = validation_message
-        self.line = line
-        self.is_auto_fixable = is_auto_fixable
+    def __init__(self, errors):
+        super(FileValidationError, self).__init__(errors)
+        self.errors = errors
 
     def __str__(self):
-        if self.line is not None:
-            line_str = ':{0}'.format(self.line)
-        else:
-            line_str = ''
-
-        if self.is_auto_fixable:
-            autofix_str = 'To attempt automatic fixing, run with --fix.'
-        else:
-            autofix_str = 'Manually edit the file above to fix.'
-
-        return '{0}{1}: {2}\n\n{3}'.format(
-            self.filename, line_str, self.validation_message, autofix_str,
-        )
+        return '\n'.join([_format_error_line(*error) for error in self.errors])
