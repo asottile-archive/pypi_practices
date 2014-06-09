@@ -9,7 +9,7 @@ from pypi_practices.errors import ValidationError
 from pypi_practices.load_config import load_config
 
 
-def make_entry(check_fn, fix_fn):
+def make_entry(check_fn):
     """Make a cmdline entry.
 
     The cmdline entry will have the following options:
@@ -20,10 +20,10 @@ def make_entry(check_fn, fix_fn):
 
     The check and fix functions take the following arguments:
         cwd - Current working directory to find files at.
+        fix - True if the hook should attempt to fix.
         config - Configuration in .pypi-practices-config.yaml
 
     :param function check_fn: Function to check the rule.
-    :param function fix_fn: Function which attempts to fix the rule.
     """
     def entry(argv=None):
         if argv is None:
@@ -54,15 +54,8 @@ def make_entry(check_fn, fix_fn):
 
         try:
             config = load_config(cwd)
-        except ValidationError as e:
-            print(five.text(e))
-            return 1
-
-        if args.fix:
-            return fix_fn(cwd, config)
-
-        try:
-            return check_fn(cwd, config)
+            fix = args.fix or config.get('autofix', True)
+            return check_fn(cwd, fix, config)
         except ValidationError as e:
             print(five.text(e))
             return 1

@@ -5,7 +5,6 @@ import io
 import os.path
 
 from pypi_practices.check_readme import check_readme
-from pypi_practices.check_readme import fix_readme
 from pypi_practices.errors import FileValidationError
 from testing.util import assert_raises_with_msg
 
@@ -24,10 +23,4 @@ def test_returns_zero_readme_exists_and_is_correct(tmpdir):
         readme.write('my package\n=========\n')
 
     ret = check_readme(tmpdir.strpath)
-    assert ret == 0
-
-
-def test_fix(tmpdir):
-    # TODO: actually assert something
-    ret = fix_readme(tmpdir.strpath)
     assert ret == 0

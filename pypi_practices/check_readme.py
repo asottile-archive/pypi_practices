@@ -22,11 +22,7 @@ def check_readme(cwd):
     return 0
 
 
-def fix_readme(_):
-    return 0
-
-
-entry = make_entry(check_readme, fix_readme)
+entry = make_entry(check_readme)
 
 
 if __name__ == '__main__':

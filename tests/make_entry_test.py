@@ -15,29 +15,21 @@ from testing.util import REMatcher
 
 # pylint:disable=redefined-outer-name
 
-noop = mock.Mock()
-
 
 @pytest.yield_fixture
 def fake_entry():
     class fake_entry_state(object):
-        check_fn_cwd = None
-        check_fn_config = None
-        fix_fn_cwd = None
-        fix_fn_config = None
+        cwd_arg = None
+        config_arg = None
         entry = None
 
-    def check_fn(cwd, config):
-        fake_entry_state.check_fn_cwd = cwd
-        fake_entry_state.check_fn_config = config
+    def check_fn(cwd, fix, config):
+        fake_entry_state.cwd_arg = cwd
+        fake_entry_state.fix_arg = fix
+        fake_entry_state.config_arg = config
         return 0
 
-    def fix_fn(cwd, config):
-        fake_entry_state.fix_fn_cwd = cwd
-        fake_entry_state.fix_fn_config = config
-        return 0
-
-    fake_entry_state.entry = staticmethod(make_entry(check_fn, fix_fn))
+    fake_entry_state.entry = staticmethod(make_entry(check_fn))
     yield fake_entry_state
 
 
@@ -45,23 +37,23 @@ def test_converts_args_to_text(fake_entry):
     # Native str (py2 vs py3)
     args = [str('--cwd'), str('path')]
     fake_entry.entry(args)
-    assert type(fake_entry.check_fn_cwd) is five.text
-    assert fake_entry.check_fn_cwd == 'path'
+    assert type(fake_entry.cwd_arg) is five.text
+    assert fake_entry.cwd_arg == 'path'
 
 
 def test_cwd_defaults_to_dot(fake_entry):
     fake_entry.entry([])
-    assert fake_entry.check_fn_cwd == '.'
+    assert fake_entry.cwd_arg == '.'
 
 
 def test_fix_calls_fix(fake_entry):
     fake_entry.entry(['--fix'])
-    assert fake_entry.fix_fn_cwd == '.'
+    assert fake_entry.fix_arg is True
 
 
 def test_ignores_extra_filename_args(fake_entry):
     fake_entry.entry(['README.md', 'tox.ini'])
-    assert fake_entry.check_fn_cwd == '.'
+    assert fake_entry.cwd_arg == '.'
 
 
 @pytest.mark.parametrize('args', ([], ['--fix']))
@@ -73,7 +65,7 @@ def test_returns_0_for_ok(fake_entry, args):
 def test_no_args_passed_uses_sys_argv(fake_entry):
     with mock.patch.object(sys, 'argv', ['hook-exe', '--cwd', 'foo_cwd']):
         fake_entry.entry()
-        assert fake_entry.check_fn_cwd == 'foo_cwd'
+        assert fake_entry.cwd_arg == 'foo_cwd'
 
 
 @pytest.yield_fixture
@@ -94,7 +86,7 @@ def test_raises_validation_error(print_mock):
             'Missing something.'
         )
 
-    entry = make_entry(raising_check, noop)
+    entry = make_entry(raising_check)
     ret = entry([])
     assert ret == 1
     print_mock.assert_called_once_with(
@@ -112,7 +104,7 @@ def test_message_contains_line_if_specified(print_mock):
             line=5,
         )
 
-    entry = make_entry(raising_check_with_line_number, noop)
+    entry = make_entry(raising_check_with_line_number)
     ret = entry([])
     assert ret == 1
     print_mock.assert_called_once_with(
@@ -130,7 +122,7 @@ def test_auto_fixable_prints_auto_fixable(print_mock):
             is_auto_fixable=True,
         )
 
-    entry = make_entry(raising_check_auto_fixable, noop)
+    entry = make_entry(raising_check_auto_fixable)
     ret = entry([])
     assert ret == 1
     print_mock.assert_called_once_with(
@@ -147,7 +139,7 @@ def test_passes_config(tmpdir, fake_entry):
 
     ret = fake_entry.entry(['--cwd', tmpdir.strpath])
     assert ret == 0
-    assert fake_entry.check_fn_config == {'autofix': True}
+    assert fake_entry.config_arg == {'autofix': True}
 
 
 def test_failing_config(tmpdir, fake_entry, print_mock):
