@@ -10,9 +10,12 @@ from testing.util import assert_raises_with_msg
 from testing.util import REMatcher
 
 
-def test_load_config_returns_empty_dict_non_existing(tmpdir):
-    ret = load_config(tmpdir.strpath)
-    assert ret == {}
+def test_load_config_raises_non_existing(tmpdir):
+    with assert_raises_with_msg(
+        ConfigValidationError,
+        '.pypi-practices-config.yaml: File does not exist.'
+    ):
+        load_config(tmpdir.strpath)
 
 
 def _write_config_file(cwd, contents):
@@ -27,12 +30,14 @@ def test_load_trivial_config(tmpdir):
         'autofix: true\n'
         'github_user: asottile\n'
         'package_name: pypi_practices\n'
+        'repo_description: Python packaging best practices\n'
     )
 
     assert load_config(tmpdir.strpath) == {
         'autofix': True,
         'github_user': 'asottile',
         'package_name': 'pypi_practices',
+        'repo_description': 'Python packaging best practices'
     }
 
 
@@ -55,7 +60,13 @@ def test_load_invalid_yaml(tmpdir):
 
 def test_valid_yaml_invalid_config(tmpdir):
     # autofix is a boolean
-    _write_config_file(tmpdir.strpath, 'autofix: herp')
+    _write_config_file(
+        tmpdir.strpath,
+        'autofix: herp\n'
+        'github_user: asottile\n'
+        'package_name: pypi_practices\n'
+        'repo_description: Python packaging best practices\n'
+    )
 
     with assert_raises_with_msg(
         ConfigValidationError,

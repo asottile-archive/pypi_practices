@@ -9,7 +9,7 @@ from pypi_practices.errors import ValidationError
 from pypi_practices.load_config import load_config
 
 
-def make_entry(check_fn):
+def make_entry(check_fn, load_config_fn=None):
     """Make a cmdline entry.
 
     The cmdline entry will have the following options:
@@ -25,6 +25,8 @@ def make_entry(check_fn):
 
     :param function check_fn: Function to check the rule.
     """
+    load_config_fn = load_config_fn or load_config
+
     def entry(argv=None):
         if argv is None:
             argv = sys.argv[1:]
@@ -53,8 +55,8 @@ def make_entry(check_fn):
             cwd = cwd.decode('utf-8')
 
         try:
-            config = load_config(cwd)
-            fix = args.fix or config.get('autofix', True)
+            config = load_config_fn(cwd)
+            fix = args.fix or config['autofix']
             return check_fn(cwd, fix, config)
         except ValidationError as e:
             print(five.text(e))

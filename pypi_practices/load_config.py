@@ -16,6 +16,12 @@ CONFIG_SCHEMA = {
         'package_name': {'type': 'string'},
         'repo_description': {'type': 'string'},
     },
+    'required': [
+        'autofix',
+        'github_user',
+        'package_name',
+        'repo_description',
+    ]
 }
 
 
@@ -29,7 +35,10 @@ def load_config(cwd):
     """
     config_filename = os.path.join(cwd, '.pypi-practices-config.yaml')
     if not os.path.exists(config_filename):
-        return {}
+        raise ConfigValidationError(
+            '.pypi-practices-config.yaml',
+            'File does not exist.'
+        )
 
     with io.open(config_filename) as config_file:
         try:

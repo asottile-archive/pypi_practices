@@ -39,20 +39,6 @@ def test_returns_zero_readme_exists_and_is_correct(tmpdir):
     assert ret == 0
 
 
-def test_cannot_fix_due_to_no_config(tmpdir):
-    with assert_raises_with_msg(
-        FileValidationError,
-        'README.md: File does not exist.\n'
-        'README.md: Could not fix: set `github_user` in '
-        '.pypi-practices-config.yaml.\n'
-        'README.md: Could not fix: set `package_name` in '
-        '.pypi-practices-config.yaml.\n'
-        'README.md: Could not fix: set `repo_description` in '
-        '.pypi-practices-config.yaml.'
-    ):
-        check_readme(tmpdir.strpath, True, {})
-
-
 def test_fixes_readme_dne(tmpdir):
     with assert_raises_with_msg(
         FileValidationError,
@@ -122,22 +108,6 @@ def test_installation_missing_installation_no_fix():
     assert ret == contents
     assert errors == [
         ('README.md', None, 'Expected an ### Installation section.'),
-    ]
-
-
-def test_installation_fix_no_package_name():
-    contents = 'before\n'
-    errors = []
-    ret = _check_has_installation(errors, contents, True, {})
-    assert ret == contents
-    assert errors == [
-        ('README.md', None, 'Expected an ### Installation section.'),
-        (
-            'README.md',
-            None,
-            'Could not fix: set `package_name` in '
-            '.pypi-practices-config.yaml.'
-        ),
     ]
 
 

@@ -8,14 +8,20 @@ from pypi_practices.errors import FileValidationError
 from pypi_practices.make_entry import make_entry
 
 
-def _no_key_error(filename, key):
-    return (
-        filename,
-        None,
-        'Could not fix: set `{0}` in .pypi-practices-config.yaml.'.format(
-            key,
-        ),
-    )
+# pylint:disable=star-args
+
+
+TRAVIS_BLING = (
+    '[![Build Status](https://travis-ci.org/{0}/{1}.svg?branch=master)]'
+    '(https://travis-ci.org/{0}/{1})'
+)
+
+
+COVERALLS_BLING = (
+    '[![Coverage Status]'
+    '(https://img.shields.io/coveralls/{0}/{1}.svg?branch=master)]'
+    '(https://coveralls.io/r/{0}/{1})'
+)
 
 
 def _check_file_exists(errors, cwd, fix, config):
@@ -26,20 +32,7 @@ def _check_file_exists(errors, cwd, fix, config):
 
     errors.append(('README.md', None, 'File does not exist.'))
 
-    github_user = config.get('github_user')
-    package_name = config.get('package_name')
-    repo_description = config.get('repo_description')
-
-    if fix and not github_user:
-        errors.append(_no_key_error('README.md', 'github_user'))
-
-    if fix and not package_name:
-        errors.append(_no_key_error('README.md', 'package_name'))
-
-    if fix and not repo_description:
-        errors.append(_no_key_error('README.md', 'repo_description'))
-
-    if fix and github_user and package_name and repo_description:
+    if fix:
         errors.append(('README.md', None, 'Fixed!'))
         readme_template_filename = pkg_resources.resource_filename(
             'pypi_practices', 'resources/README.md.template',
@@ -47,13 +40,7 @@ def _check_file_exists(errors, cwd, fix, config):
         template_contents = io.open(readme_template_filename).read()
 
         with io.open(readme_path, 'w') as readme_file:
-            readme_file.write(
-                template_contents.format(
-                    github_user=github_user,
-                    package_name=package_name,
-                    repo_description=repo_description,
-                )
-            )
+            readme_file.write(template_contents.format(**config))
 
     raise FileValidationError(errors)
 
@@ -67,19 +54,14 @@ def _check_has_installation(errors, original_contents, fix, config):
         'README.md', None, 'Expected an ### Installation section.',
     ))
 
-    package_name = config.get('package_name')
-
-    if fix and not package_name:
-        errors.append(_no_key_error('README.md', 'package_name'))
-
-    if fix and package_name:
+    if fix:
         errors.append(('README.md', None, 'Fixed!'))
         return original_contents + (
             '\n'
             '### Installation\n'
             '\n'
             '`$ pip install {0}`\n'
-            '\n\n'.format(package_name)
+            '\n\n'.format(config['package_name'])
         )
     else:
         return original_contents
