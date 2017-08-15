@@ -16,4 +16,3 @@ ignored-classes=pytest
 
 [DESIGN]
 min-public-methods=0
-
