@@ -13,9 +13,6 @@ from pypi_practices.make_entry import make_entry
 from testing.util import REMatcher
 
 
-# pylint:disable=redefined-outer-name
-
-
 @pytest.yield_fixture
 def fake_entry():
     class fake_entry_state(object):
