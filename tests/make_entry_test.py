@@ -13,7 +13,7 @@ from pypi_practices.make_entry import make_entry
 from testing.util import REMatcher
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def fake_entry():
     class fake_entry_state(object):
         cwd_arg = None
@@ -65,7 +65,7 @@ def test_no_args_passed_uses_sys_argv(fake_entry):
         assert fake_entry.cwd_arg == 'foo_cwd'
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def print_mock():
     with mock.patch.object(five.builtins, 'print') as print_mock:
         yield print_mock
